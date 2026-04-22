@@ -1,0 +1,33 @@
+---
+name: Deploy to GitHub Pages
+on: # Memicu workflow saat ada push ke branch main dan file index.html berubah
+  push:
+    branches:
+      - main
+    paths:
+      - './src/**'
+      - './.github/workflows/deploy.yml'
+jobs:
+  deploy:
+    environment:  # Menentukan environment untuk deployment untuk GitHub Pages agar dapat mengakses URL halaman yang dideploy
+      name: github-pages
+      url: ${{ steps.deploy-pages.outputs.page_url }}
+    runs-on: ubuntu-latest
+    permissions:  # Memberikan izin yang diperlukan untuk mengakses repository dan melakukan deployment ke GitHub Pages
+      contents: read
+      pages: write
+      id-token: write
+    steps:  # Langkah-langkah untuk melakukan checkout repository, mengupload artifact, dan melakukan deployment ke GitHub Pages
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with: # Mengupload file dari direktori src sebagai artifact untuk digunakan dalam langkah deployment
+          name: github-pages
+          path: './src/**'
+          retention-days: 1
+      - name: Deploy to GitHub Pages
+        id: deploy-pages
+        uses: actions/deploy-pages@v4
+        with: # Menggunakan artifact yang telah diupload untuk melakukan deployment ke GitHub Pages
+          artifact-name: github-pages
