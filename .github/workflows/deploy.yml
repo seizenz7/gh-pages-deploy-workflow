@@ -4,9 +4,7 @@ on: # Memicu workflow saat ada push ke branch main dan file index.html berubah
   push:
     branches:
       - main
-    paths:
-      - './src/**'
-      - './.github/workflows/deploy.yml'
+
 jobs:
   deploy:
     environment:  # Menentukan environment untuk deployment untuk GitHub Pages agar dapat mengakses URL halaman yang dideploy
