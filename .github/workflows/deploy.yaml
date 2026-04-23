@@ -1,44 +1,44 @@
 ---
 name: Deploy to GitHub Pages
-on: # Memicu workflow saat ada push ke branch main dan file index.html berubah
+on:                   # Memicu workflow saat ada push ke branch main dan file index.html berubah
   push:
     branches:
       - main
     paths:
-      - 'src/index.html'
       - 'src/**'
       - '.github/workflows/deploy.yaml'
 jobs:
   deploy:
-    environment:  # Menentukan environment untuk deployment untuk GitHub Pages agar dapat mengakses URL halaman yang dideploy
+    environment:      # Menentukan environment untuk deployment untuk GitHub Pages agar dapat mengakses URL halaman yang dideploy
       name: github-pages
       url: ${{ steps.deploy-pages.outputs.page_url }}
     runs-on: ubuntu-latest
-    permissions:  # Memberikan izin yang diperlukan untuk mengakses repository dan melakukan deployment ke GitHub Pages
-      contents: read
-      pages: write
-      id-token: write
-    steps:  # Langkah-langkah untuk melakukan checkout repository, mengupload artifact, dan melakukan deployment ke GitHub Pages
+    permissions:      # Memberikan izin yang diperlukan untuk mengakses repository dan melakukan deployment ke GitHub Pages
+      contents: read  # Izin untuk membaca konten repository
+      pages: write    # Izin untuk menulis ke GitHub Pages
+      id-token: write # Izin untuk menggunakan OIDC token jika diperlukan untuk autentikasi
+    steps:            # Langkah-langkah untuk melakukan checkout repository, mengupload artifact, dan melakukan deployment ke GitHub Pages
+      # Langkah pertama adalah melakukan checkout repository untuk mendapatkan akses ke file yang akan dideploy
       - name: Checkout repository
         uses: actions/checkout@v3
-      
+      # Langkah kedua adalah menyiapkan Pages dengan menggunakan action configure-pages yang akan mengatur konfigurasi yang diperlukan untuk deployment ke GitHub Pages
       - name: Setup Pages
         uses: actions/configure-pages@v5
-      
+      # Langkah ketiga adalah menyiapkan file statis yang akan dideploy ke GitHub Pages. 
+      # Dalam langkah ini, kita membuat folder _site, menyalin semua file dari folder src ke _site, 
+      # membersihkan symlink yang bisa menyebabkan error deployment, dan menghapus folder serta file yang tidak perlu seperti .git, .github, node_modules, dan file git lainnya.
       - name: Prepare static files
         run: |
           mkdir -p _site
           cp -R src/* _site/
-          # Bersihkan symlink yang bisa menyebabkan error deployment
-          find _site -type l -delete
-          # Hapus folder dan file yang tidak perlu
+          find _site -type l -delete 
           rm -rf _site/.git _site/.github _site/node_modules _site/.gitignore _site/.git* 2>/dev/null || true
-      
+      # Langkah keempat adalah mengupload artifact yang sudah disiapkan ke GitHub Pages menggunakan action upload-pages-artifact.
       - name: Upload artifact to GitHub Pages
         uses: actions/upload-pages-artifact@v3
         with:
           path: '_site'
-      
+      # Langkah kelima adalah melakukan deployment ke GitHub Pages menggunakan action deploy-pages yang akan mengambil artifact yang sudah diupload dan melakukan deployment ke halaman GitHub Pages.
       - name: Deploy to GitHub Pages
-        id: deploy-pages
+        id: deploy-pages # Memberikan ID pada langkah ini untuk dapat mengakses output seperti URL halaman yang dideploy
         uses: actions/deploy-pages@v4
