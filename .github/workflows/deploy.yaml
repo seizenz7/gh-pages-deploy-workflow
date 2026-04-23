@@ -21,20 +21,24 @@ jobs:
     steps:  # Langkah-langkah untuk melakukan checkout repository, mengupload artifact, dan melakukan deployment ke GitHub Pages
       - name: Checkout repository
         uses: actions/checkout@v3
+      
       - name: Setup Pages
         uses: actions/configure-pages@v5
+      
       - name: Prepare static files
         run: |
           mkdir -p _site
           cp -R src/* _site/
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v4
-        with: # Mengupload file dari direktori src sebagai artifact untuk digunakan dalam langkah deployment
-          name: github-pages
+          # Bersihkan symlink yang bisa menyebabkan error deployment
+          find _site -type l -delete
+          # Hapus folder dan file yang tidak perlu
+          rm -rf _site/.git _site/.github _site/node_modules _site/.gitignore _site/.git* 2>/dev/null || true
+      
+      - name: Upload artifact to GitHub Pages
+        uses: actions/upload-pages-artifact@v3
+        with:
           path: '_site'
-          retention-days: 1
+      
       - name: Deploy to GitHub Pages
         id: deploy-pages
         uses: actions/deploy-pages@v4
-        with: # Menggunakan artifact yang telah diupload untuk melakukan deployment ke GitHub Pages
-          artifact_name: github-pages
