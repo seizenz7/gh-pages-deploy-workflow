@@ -1,0 +1,25 @@
+---
+name: Deploy to GitHub Pages
+on: # Memicu workflow saat ada push ke branch main dan file index.html berubah
+  push:
+    branches:
+      - main
+    paths:
+      - 'src/index.html'
+      - 'src/**'
+      - '.github/workflows/deploy.yaml'
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps: # Langkah-langkah untuk melakukan deploy ke GitHub Pages
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - name: Prepare static files
+        run: |
+          mkdir -p _site
+          cp -R src/* _site/
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./_site
